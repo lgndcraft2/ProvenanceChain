@@ -45,7 +45,7 @@ pub mod provenance_chain {
 #[derive(Accounts)]
 #[instruction(hash: String)]
 pub struct SubmitPaper<'info> {
-    #[account(init, payer = owner, space = PAPER_ACCOUNT_SPACE, seeds = [hash.as_bytes()], bump)]
+    #[account(init, payer = owner, space = PAPER_ACCOUNT_SPACE, seeds = [&hash.as_bytes()[..32]], bump)]
     pub paper: Account<'info, PaperAccount>,
     #[account(mut)]
     pub owner: Signer<'info>,

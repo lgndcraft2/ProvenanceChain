@@ -64,7 +64,7 @@ export default function SubmitPage() {
       const provider = new AnchorProvider(connection, wallet as never, { commitment: 'confirmed' });
       const program = getProgram(provider);
 
-      const [paperPDA] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
+      const [paperPDA] = PublicKey.findProgramAddressSync([Buffer.from(hash.substring(0, 32))], PROGRAM_ID);
       const tx = await (program.methods as any)
   .submitPaper(hash, title.trim(), authorList)
   .accounts({ paper: paperPDA, owner: publicKey, systemProgram: SystemProgram.programId })

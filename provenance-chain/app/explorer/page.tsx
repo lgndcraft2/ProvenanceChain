@@ -91,7 +91,7 @@ export default function ExplorerPage() {
       const paper = papers.find(p => p.id === paperId);
       if (!paper) throw new Error('Paper not found.');
 
-      const [paperPda] = PublicKey.findProgramAddressSync([Buffer.from(paper.hash)], PROGRAM_ID);
+      const [paperPda] = PublicKey.findProgramAddressSync([Buffer.from(paper.hash.substring(0, 32))], PROGRAM_ID);
       await (program.methods as any)
         .updateStatus(toStatusArg(newStatus))
         .accounts({ paper: paperPda, owner: publicKey })
