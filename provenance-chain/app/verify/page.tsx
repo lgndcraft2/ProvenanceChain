@@ -28,12 +28,12 @@ interface PaperRecord {
 export default function VerifyPage() {
   const { connection } = useConnection();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile]       = useState<File | null>(null);
-  const [hash, setHash]       = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [hash, setHash] = useState('');
   const [hashing, setHashing] = useState(false);
   const [querying, setQuerying] = useState(false);
-  const [result, setResult]   = useState<Result>(null);
-  const [record, setRecord]   = useState<PaperRecord | null>(null);
+  const [result, setResult] = useState<Result>(null);
+  const [record, setRecord] = useState<PaperRecord | null>(null);
   const [dragging, setDragging] = useState(false);
 
   const processFile = async (f: File) => {
@@ -67,7 +67,7 @@ export default function VerifyPage() {
       const program = getProgram(provider);
 
       const [pda] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
-      const account = await program.account.paperAccount.fetch(pda);
+      const account = await (program.account as any).paperAccount.fetch(pda);
 
       const rawStatus = (account.status || {}) as Record<string, unknown>;
       const statusKey = Object.keys(rawStatus)[0] || 'Active';

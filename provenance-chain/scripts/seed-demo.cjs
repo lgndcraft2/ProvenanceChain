@@ -103,11 +103,11 @@ const program = new anchor.Program(IDL, PROGRAM_ID, provider);
 const submitIfMissing = async (paper) => {
   const [pda] = PublicKey.findProgramAddressSync([Buffer.from(paper.hash)], PROGRAM_ID);
   try {
-    await program.account.paperAccount.fetch(pda);
+    await (program.account as any).paperAccount.fetch(pda);
     console.log(`skip: ${paper.title} (already exists)`);
     return null;
   } catch {
-    const tx = await program.methods
+    const tx = await (program.methods as any)
       .submitPaper(paper.hash, paper.title, paper.authors)
       .accounts({ paper: pda, owner: wallet.publicKey, systemProgram: SystemProgram.programId })
       .rpc();
