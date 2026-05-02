@@ -51,7 +51,7 @@ export default function ExplorerPage() {
         };
         const provider = new AnchorProvider(connection, readOnlyWallet as never, { commitment: 'confirmed' });
         const program = getProgram(provider);
-        const accounts = await program.account.paperAccount.all();
+        const accounts = await (program.account as any).paperAccount.all();
         const loaded = accounts.map(({ publicKey: pda, account }) => ({
           id: pda.toBase58(),
           title: account.title,
