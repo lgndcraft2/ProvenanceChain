@@ -8,6 +8,70 @@ ProvenanceChain is a hackathon MVP that uses Solana to create an immutable, veri
 
 ---
 
+## ✅ Current Status
+
+### Done (code complete, awaiting deploy)
+- Anchor program implemented in [contract/provenance-chain/programs/provenance-chain/src/lib.rs](contract/provenance-chain/programs/provenance-chain/src/lib.rs)
+- Submit flow wired to Anchor program in [provenance-chain/app/submit/page.tsx](provenance-chain/app/submit/page.tsx)
+- Verify flow wired to Anchor program in [provenance-chain/app/verify/page.tsx](provenance-chain/app/verify/page.tsx)
+- Explorer load + update-status wired to Anchor program in [provenance-chain/app/explorer/page.tsx](provenance-chain/app/explorer/page.tsx)
+- Demo seeding script added in [provenance-chain/scripts/seed-demo.cjs](provenance-chain/scripts/seed-demo.cjs)
+
+### Remaining
+- Deploy Anchor program to Devnet and capture program ID
+- Seed demo papers on-chain (Task 7 in plan below)
+- Create a tampered PDF for Verify demo (Task 8)
+- End-to-end polish + testing (Task 9)
+
+---
+
+## 🧪 How To Test (Local UI + Devnet)
+
+### 1) Deploy the program (Devnet)
+```bash
+cd contract/provenance-chain
+anchor build
+anchor deploy --provider.cluster devnet
+```
+Copy the program ID from the deploy output.
+
+### 2) Configure the frontend
+Create [provenance-chain/.env.local](provenance-chain/.env.local) with:
+```bash
+NEXT_PUBLIC_PROGRAM_ID=YOUR_DEPLOYED_PROGRAM_ID
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
+```
+
+### 3) Run the frontend
+```bash
+cd provenance-chain
+npm install
+npm run dev
+```
+
+### 4) Verify Submit flow
+Open `/submit`, connect wallet, upload a PDF, submit.
+- Success = real tx signature + PDA account exists on devnet.
+
+### 5) Verify Verify flow
+Open `/verify`, upload the same PDF.
+- Success = `VERIFIED` result with on-chain title/authors/status.
+
+### 6) Verify Explorer + Update Status
+Open `/explorer`.
+- Success = on-chain list loads and owner can update status.
+
+---
+
+## 🚀 Demo Data (Seed Papers)
+After deploy + env setup, run:
+```bash
+node provenance-chain/scripts/seed-demo.cjs
+```
+Success = papers appear in `/explorer` after refresh.
+
+---
+
 ## 📐 Architecture Overview
 
 ```
