@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
+import { useConnection } from '@solana/wallet-adapter-react';
+import { AnchorProvider } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
+import { Buffer } from 'buffer';
 import Link from 'next/link';
+import { getProgram, PROGRAM_ID } from '@/lib/provenanceChainProgram';
 
 async function hashFile(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
@@ -21,6 +26,7 @@ interface PaperRecord {
 }
 
 export default function VerifyPage() {
+  const { connection } = useConnection();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile]       = useState<File | null>(null);
   const [hash, setHash]       = useState('');
@@ -52,22 +58,29 @@ export default function VerifyPage() {
     if (!hash) return;
     setQuerying(true); setResult(null); setRecord(null);
     try {
-      // ── TODO: real Anchor PDA lookup ──
-      // const [pda] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
-      // const account = await program.account.paperAccount.fetch(pda);
+      const readOnlyWallet = {
+        publicKey: PublicKey.default,
+        signAllTransactions: async (txs: never) => txs,
+        signTransaction: async (tx: never) => tx,
+      };
+      const provider = new AnchorProvider(connection, readOnlyWallet as never, { commitment: 'confirmed' });
+      const program = getProgram(provider);
 
-      // ── DEMO SIMULATION ──
-      await new Promise(r => setTimeout(r, 1800));
-      const last = hash.slice(-1);
-      if (last === 'b') {
-        setResult('not_found');
-      } else if (last === 'a') {
-        setResult('retracted');
-        setRecord({ title: 'Malaria Intervention Outcomes in Western Kenya', authors: ['Dr. Amina Osei'], timestamp: Date.now() - 1000*60*60*24*90, status: 'Retracted', txSig: 'DEMO_TX_RET' });
-      } else {
-        setResult('verified');
-        setRecord({ title: 'Malaria Intervention Outcomes in Western Kenya', authors: ['Dr. Amina Osei', 'Dr. James Mwangi'], timestamp: Date.now() - 1000*60*60*24*30, status: 'Active', txSig: 'DEMO_TX_VER' });
-      }
+      const [pda] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
+      const account = await program.account.paperAccount.fetch(pda);
+
+      const rawStatus = (account.status || {}) as Record<string, unknown>;
+      const statusKey = Object.keys(rawStatus)[0] || 'Active';
+      const status = (statusKey.charAt(0).toUpperCase() + statusKey.slice(1)) as PaperRecord['status'];
+
+      setRecord({
+        title: account.title,
+        authors: account.authors,
+        timestamp: Number(account.timestamp) * 1000,
+        status,
+        txSig: '',
+      });
+      setResult(status === 'Retracted' ? 'retracted' : 'verified');
     } catch {
       setResult('not_found');
     }
@@ -244,14 +257,16 @@ export default function VerifyPage() {
                 <div className="meta-row"><span className="meta-key">Authors</span><span className="meta-val">{record.authors.join(', ')}</span></div>
                 <div className="meta-row"><span className="meta-key">Committed</span><span className="meta-val">{fmt(record.timestamp)}</span></div>
                 <div className="meta-row"><span className="meta-key">Status</span><span className="meta-val clr-green">{record.status}</span></div>
-                <div className="meta-row">
-                  <span className="meta-key">Transaction</span>
-                  <span className="meta-val">
-                    <a className="tx-link" href={`https://solscan.io/tx/${record.txSig}?cluster=devnet`} target="_blank" rel="noreferrer">
-                      {record.txSig.slice(0, 16)}…
-                    </a>
-                  </span>
-                </div>
+                {record.txSig && (
+                  <div className="meta-row">
+                    <span className="meta-key">Transaction</span>
+                    <span className="meta-val">
+                      <a className="tx-link" href={`https://solscan.io/tx/${record.txSig}?cluster=devnet`} target="_blank" rel="noreferrer">
+                        {record.txSig.slice(0, 16)}…
+                      </a>
+                    </span>
+                  </div>
+                )}
               </div>
               <button className="btn-again" onClick={reset}>Verify Another</button>
             </div>

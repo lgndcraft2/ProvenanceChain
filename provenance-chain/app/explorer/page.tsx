@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { AnchorProvider } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
+import { Buffer } from 'buffer';
 import Link from 'next/link';
+import { getProgram, PROGRAM_ID } from '@/lib/provenanceChainProgram';
 
 type Status = 'Active' | 'Updated' | 'Retracted';
 
@@ -18,16 +22,17 @@ interface Paper {
   txSig: string;
 }
 
-const DEMO_PAPERS: Paper[] = [
-  { id: '1', title: 'Malaria Intervention Outcomes in Western Kenya', authors: ['Dr. Amina Osei', 'Dr. James Mwangi'], hash: 'a3f8c2e1d4b7f9a0c5e8d2b4f6a1c3e7d9b2f4a6c8e0d3b5f7a9c1e4d6b8f0a2', status: 'Active', timestamp: Date.now() - 1000*60*60*24*30, owner: '7xKp...3mNq', txSig: 'DEMO_TX_001' },
-  { id: '2', title: 'Blockchain Applications in Nigerian Secondary Education', authors: ['Prof. Chidera Obi', 'Dr. Fatima Al-Hassan'], hash: 'b9d1e3f5a7c2b4d6e8f0a2c4d6e8f0a2b4d6e8f0a2c4d6e8f0a2b4d6e8f0a2c4', status: 'Updated', timestamp: Date.now() - 1000*60*60*24*60, owner: '3kRt...9pWx', txSig: 'DEMO_TX_002' },
-  { id: '3', title: 'Decentralised Identity Verification for African Universities', authors: ['Dr. Emeka Nwosu'], hash: 'c5a7b9d1e3f5a7b9d1e3f5a7b9d1e3f5a7b9d1e3f5a7b9d1e3f5a7b9d1e3f5a7', status: 'Retracted', timestamp: Date.now() - 1000*60*60*24*90, owner: '9mPz...2vYk', txSig: 'DEMO_TX_003' },
-  { id: '4', title: 'Solar Energy Adoption Patterns in Sub-Saharan Africa', authors: ['Dr. Aiko Mensah', 'Dr. Samuel Adeyemi', 'Prof. Lena Boateng'], hash: 'd1e3f5a7c9b2d4e6f8a0c2d4e6f8a0b2d4e6f8a0c2d4e6f8a0b2d4e6f8a0c2d4', status: 'Active', timestamp: Date.now() - 1000*60*60*24*14, owner: '2nBq...7hSj', txSig: 'DEMO_TX_004' },
-  { id: '5', title: 'On the Reproducibility Crisis in AI Research: A Provenance Perspective', authors: ['Dr. Liu Wei', 'Dr. Priya Sharma'], hash: 'e7f9a1b3d5e7f9a1b3d5e7f9a1b3d5e7f9a1b3d5e7f9a1b3d5e7f9a1b3d5e7f9', status: 'Active', timestamp: Date.now() - 1000*60*60*24*5, owner: '5pHr...1cMn', txSig: 'DEMO_TX_005' },
-];
+const parseStatus = (status: Record<string, unknown> | string): Status => {
+  if (typeof status === 'string') return status as Status;
+  const key = Object.keys(status || {})[0] || 'Active';
+  return (key.charAt(0).toUpperCase() + key.slice(1)) as Status;
+};
+
+const toStatusArg = (status: Status) => ({ [status.toLowerCase()]: {} } as Record<string, object>);
 
 export default function ExplorerPage() {
-  const { connected, publicKey } = useWallet();
+  const { connection } = useConnection();
+  const { connected, publicKey, signAllTransactions, signTransaction } = useWallet();
   const [papers, setPapers]     = useState<Paper[]>([]);
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
@@ -35,10 +40,38 @@ export default function ExplorerPage() {
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: replace with real getProgramAccounts call
-    const timer = setTimeout(() => { setPapers(DEMO_PAPERS); setLoading(false); }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    let mounted = true;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const readOnlyWallet = {
+          publicKey: PublicKey.default,
+          signAllTransactions: async (txs: never) => txs,
+          signTransaction: async (tx: never) => tx,
+        };
+        const provider = new AnchorProvider(connection, readOnlyWallet as never, { commitment: 'confirmed' });
+        const program = getProgram(provider);
+        const accounts = await program.account.paperAccount.all();
+        const loaded = accounts.map(({ publicKey: pda, account }) => ({
+          id: pda.toBase58(),
+          title: account.title,
+          authors: account.authors,
+          hash: account.hash,
+          status: parseStatus(account.status as Record<string, unknown>),
+          timestamp: Number(account.timestamp) * 1000,
+          owner: account.owner.toBase58(),
+          txSig: '',
+        }));
+        if (mounted) setPapers(loaded.sort((a, b) => b.timestamp - a.timestamp));
+      } catch {
+        if (mounted) setPapers([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, [connection]);
 
   const filtered = papers.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase())
@@ -48,11 +81,27 @@ export default function ExplorerPage() {
   });
 
   const handleUpdateStatus = async (paperId: string, newStatus: Status) => {
+    if (!publicKey) return;
     setUpdating(paperId);
     try {
-      // TODO: real Anchor call
-      await new Promise(r => setTimeout(r, 1500));
-      setPapers(prev => prev.map(p => p.id === paperId ? { ...p, status: newStatus } : p));
+      const wallet = { publicKey, signAllTransactions, signTransaction };
+      const provider = new AnchorProvider(connection, wallet as never, { commitment: 'confirmed' });
+      const program = getProgram(provider);
+
+      const paper = papers.find(p => p.id === paperId);
+      if (!paper) throw new Error('Paper not found.');
+
+      const [paperPda] = PublicKey.findProgramAddressSync([Buffer.from(paper.hash)], PROGRAM_ID);
+      await program.methods
+        .updateStatus(toStatusArg(newStatus) as never)
+        .accounts({ paper: paperPda, owner: publicKey })
+        .rpc();
+
+      const refreshed = await program.account.paperAccount.fetch(paperPda);
+      const nextStatus = parseStatus(refreshed.status as Record<string, unknown>);
+      const nextTimestamp = Number(refreshed.timestamp) * 1000;
+
+      setPapers(prev => prev.map(p => p.id === paperId ? { ...p, status: nextStatus, timestamp: nextTimestamp } : p));
     } catch (e) { console.error(e); }
     setUpdating(null);
   };
@@ -194,7 +243,7 @@ export default function ExplorerPage() {
             <div className="empty">No papers found matching your search.</div>
           ) : (
             filtered.map(paper => {
-              const isOwner = connected && publicKey?.toString().startsWith(paper.owner.slice(0, 4));
+              const isOwner = connected && publicKey?.toBase58() === paper.owner;
               return (
                 <div key={paper.id} className="card">
                   <div className="card-top">
@@ -208,9 +257,11 @@ export default function ExplorerPage() {
                     <span className="meta-item">🕐 {fmt(paper.timestamp)}</span>
                     <span className="meta-item">🔑 <code>{shortHash(paper.hash)}</code></span>
                     <span className="meta-item">👤 {paper.owner}</span>
-                    <a className="solscan-link" href={`https://solscan.io/tx/${paper.txSig}?cluster=devnet`} target="_blank" rel="noreferrer">
-                      View on Solscan →
-                    </a>
+                    {paper.txSig && (
+                      <a className="solscan-link" href={`https://solscan.io/tx/${paper.txSig}?cluster=devnet`} target="_blank" rel="noreferrer">
+                        View on Solscan →
+                      </a>
+                    )}
                   </div>
 
                   {isOwner && paper.status !== 'Retracted' && (
