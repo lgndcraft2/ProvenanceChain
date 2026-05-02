@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { AnchorProvider } from '@coral-xyz/anchor';
+import { PublicKey, SystemProgram } from '@solana/web3.js';
+import { Buffer } from 'buffer';
 import Link from 'next/link';
+import { getProgram, PROGRAM_ID } from '@/lib/provenanceChainProgram';
 
 async function hashFile(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
@@ -15,7 +19,8 @@ async function hashFile(file: File): Promise<string> {
 type Step = 'idle' | 'hashing' | 'ready' | 'submitting' | 'done' | 'error';
 
 export default function SubmitPage() {
-  const { connected } = useWallet();
+  const { connection } = useConnection();
+  const { connected, publicKey, signAllTransactions, signTransaction } = useWallet();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile]       = useState<File | null>(null);
@@ -46,20 +51,26 @@ export default function SubmitPage() {
   };
 
   const handleSubmit = async () => {
-    if (!connected || !hash || !title.trim() || !authors.trim()) return;
+    if (!connected || !publicKey || !hash || !title.trim() || !authors.trim()) return;
     setStep('submitting'); setError('');
     try {
-      // ── TODO: real Anchor call goes here ──
-      // const authorList = authors.split(',').map(a => a.trim()).filter(Boolean);
-      // const [paperPDA] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
-      // const tx = await program.methods.submitPaper(hash, title.trim(), authorList)
-      //   .accounts({ paper: paperPDA, owner: publicKey, systemProgram: SystemProgram.programId })
-      //   .rpc();
-      // setTxSig(tx);
+      const authorList = authors.split(',').map(a => a.trim()).filter(Boolean);
+      if (hash.length !== 64) throw new Error('Hash must be a 64 character SHA-256 hex string.');
+      if (title.trim().length > 200) throw new Error('Title must be 200 characters or fewer.');
+      if (authorList.length > 10) throw new Error('Maximum 10 authors allowed.');
+      if (authorList.some(a => a.length > 64)) throw new Error('Author names must be 64 characters or fewer.');
 
-      // ── DEMO (remove when Anchor is wired) ──
-      await new Promise(r => setTimeout(r, 2000));
-      setTxSig('DEMO_' + Math.random().toString(36).slice(2).toUpperCase());
+      const wallet = { publicKey, signAllTransactions, signTransaction };
+      const provider = new AnchorProvider(connection, wallet as never, { commitment: 'confirmed' });
+      const program = getProgram(provider);
+
+      const [paperPDA] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
+      const tx = await program.methods
+        .submitPaper(hash, title.trim(), authorList)
+        .accounts({ paper: paperPDA, owner: publicKey, systemProgram: SystemProgram.programId })
+        .rpc();
+
+      setTxSig(tx);
       setStep('done');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Transaction failed.';
