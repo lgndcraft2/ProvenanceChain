@@ -13,9 +13,9 @@ export const IDL: Idl = {
     {
       name: 'submitPaper',
       accounts: [
-        { name: 'paper', isMut: true, isSigner: false },
-        { name: 'owner', isMut: true, isSigner: true },
-        { name: 'systemProgram', isMut: false, isSigner: false }
+        { name: 'paper', writable: true, signer: false },
+        { name: 'owner', writable: true, signer: true },
+        { name: 'systemProgram', writable: false, signer: false }
       ],
       args: [
         { name: 'hash', type: 'string' },
@@ -26,8 +26,8 @@ export const IDL: Idl = {
     {
       name: 'updateStatus',
       accounts: [
-        { name: 'paper', isMut: true, isSigner: false },
-        { name: 'owner', isMut: false, isSigner: true }
+        { name: 'paper', writable: true, signer: false },
+        { name: 'owner', writable: false, signer: true }
       ],
       args: [
         { name: 'newStatus', type: { defined: 'PaperStatus' } }
