@@ -5,20 +5,26 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
+// Load IDL from the actual deployed file to get the program address
+const idlPath = path.join(__dirname, '../../contract/provenance-chain/target/idl/provenance_chain.json');
+const idlFile = JSON.parse(fs.readFileSync(idlPath, 'utf-8'));
+
 const PROGRAM_ID = new PublicKey(
   process.env.NEXT_PUBLIC_PROGRAM_ID ||
   process.env.PROGRAM_ID ||
-  'BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm'
+  idlFile.address ||
+  'BvkDzStztdtVZZXL5R364xwWNn3TfKG5xkN54KAV8giv'
 );
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || process.env.ANCHOR_PROVIDER_URL || 'https://api.devnet.solana.com';
 
+// IDL compatible with anchor.Program - simplified structure
 const IDL = {
   version: '0.1.0',
   name: 'provenance_chain',
   instructions: [
     {
-      name: 'submitPaper',
+      name: 'submit_paper',
       accounts: [
         { name: 'paper', isMut: true, isSigner: false },
         { name: 'owner', isMut: true, isSigner: true },
@@ -29,21 +35,11 @@ const IDL = {
         { name: 'title', type: 'string' },
         { name: 'authors', type: { vec: 'string' } }
       ]
-    },
-    {
-      name: 'updateStatus',
-      accounts: [
-        { name: 'paper', isMut: true, isSigner: false },
-        { name: 'owner', isMut: false, isSigner: true }
-      ],
-      args: [
-        { name: 'newStatus', type: { defined: 'PaperStatus' } }
-      ]
     }
   ],
   accounts: [
     {
-      name: 'paperAccount',
+      name: 'PaperAccount',
       type: {
         kind: 'struct',
         fields: [
