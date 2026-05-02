@@ -52,8 +52,8 @@ export default function ExplorerPage() {
         const provider = new AnchorProvider(connection, readOnlyWallet as never, { commitment: 'confirmed' });
         const program = getProgram(provider);
         const accounts = await (program.account as any).paperAccount.all();
-        const loaded = accounts.map(({ publicKey: pda, account }) => ({
-          id: pda.toBase58(),
+        const loaded = accounts.map(({ publicKey: pda, account }: { publicKey: PublicKey, account: any }) => ({
+        id: pda.toBase58(),
           title: account.title,
           authors: account.authors,
           hash: account.hash,
@@ -92,12 +92,12 @@ export default function ExplorerPage() {
       if (!paper) throw new Error('Paper not found.');
 
       const [paperPda] = PublicKey.findProgramAddressSync([Buffer.from(paper.hash)], PROGRAM_ID);
-      await program.methods
-        .updateStatus(toStatusArg(newStatus) as never)
+      await (program.methods as any)
+        .updateStatus(toStatusArg(newStatus))
         .accounts({ paper: paperPda, owner: publicKey })
         .rpc();
 
-      const refreshed = await program.account.paperAccount.fetch(paperPda);
+      const refreshed = await (program.account as any).paperAccount.fetch(paperPda);
       const nextStatus = parseStatus(refreshed.status as Record<string, unknown>);
       const nextTimestamp = Number(refreshed.timestamp) * 1000;
 
