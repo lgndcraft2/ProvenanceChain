@@ -32,7 +32,7 @@ export const IDL: any = {
         { name: 'owner', writable: false, signer: true }
       ],
       args: [
-        { name: 'newStatus', type: { defined: 'PaperStatus' } }
+        { name: 'newStatus', type: { defined: { name: 'PaperStatus' } } }
       ]
     }
   ],
@@ -45,9 +45,9 @@ export const IDL: any = {
           { name: 'hash', type: 'string' },
           { name: 'title', type: 'string' },
           { name: 'authors', type: { vec: 'string' } },
-          { name: 'status', type: { defined: 'PaperStatus' } },
+          { name: 'status', type: { defined: { name: 'PaperStatus' } } },
           { name: 'timestamp', type: 'i64' },
-          { name: 'owner', type: 'publicKey' }
+          { name: 'owner', type: 'pubkey' }
         ]
       }
     }
