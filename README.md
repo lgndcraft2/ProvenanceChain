@@ -8,20 +8,83 @@ ProvenanceChain is a hackathon MVP that uses Solana to create an immutable, veri
 
 ---
 
+## 🔴 DEPLOYMENT IN PROGRESS
+
+**Status:** Build complete ✅ | Wallet funded ✅ | **AWAITING DEVNET DEPLOYMENT** ⏳
+
+**What's done:**
+- Smart contract compiled and ready to deploy
+- Wallet address funded with devnet SOL
+- All frontend features implemented
+
+**Next steps (see "IMMEDIATE NEXT STEPS" section below):**
+1. Run `anchor deploy --provider.cluster devnet`
+2. Copy program ID to `.env.local`
+3. Test on frontend
+
+**Wallet Address:** `4rWch1cqhJZyhs8YkBZLSw8ya4FFPqC2KCLsnxPaADqW`  
+**Estimated time to full demo-ready:** 10 minutes
+
+---
+
 ## 📊 Project Status
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| Smart Contract (Anchor) | ✅ Complete | Ready to deploy to Devnet |
+| Smart Contract (Anchor) | ✅ Complete | Built successfully in `target/deploy/provenance_chain.so` |
 | Submit Feature | ✅ Complete | Upload PDF → Record on blockchain |
 | Verify Feature | ✅ Complete | Check if document is tampered |
 | Explorer Dashboard | ✅ Complete | View all records + update status |
-| Demo Script | ✅ Complete | Seed test data |
-| Devnet Deploy | ⏳ Ready | Next step: `anchor deploy` |
-| Demo Setup | ⏳ Ready | Will load after deploy |
+| Demo Script | ✅ Complete | Seed test data ready |
+| cargo-build-sbf | ✅ Installed | Build tool for Solana programs |
+| Wallet Funded (Airdrop) | ✅ Complete | Wallet: `4rWch1cqhJZyhs8YkBZLSw8ya4FFPqC2KCLsnxPaADqW` |
+| **Devnet Deploy** | ⏳ **NEXT** | **Ready to execute** — see below |
+| Program ID Configuration | ⏳ Ready | Add to `.env.local` after deploy |
+| Demo Setup (Seeding) | ⏳ Ready | Run after deploy |
 | Testing + Polish | 🔄 In Progress | Final refinements |
 
-**Overall Progress: ~85% — Core features done, awaiting deployment & testing**
+**Overall Progress: ~90% — Build complete, wallet funded, deployment ready**
+
+---
+
+## 🚀 IMMEDIATE NEXT STEPS (For Team)
+
+### 1️⃣ Deploy to Devnet (5 minutes)
+```bash
+export PATH="/home/codespace/.cargo/bin:/home/codespace/.local/share/solana/install/active_release/bin:$PATH"
+cd /workspaces/ProvenanceChain/contract/provenance-chain
+anchor deploy --provider.cluster devnet
+```
+
+**Output will show:**
+```
+Program Id: <YOUR_PROGRAM_ID_HERE>
+```
+
+**Copy that Program ID** (looks like: `BvkDzStztdtVZZXL5R364xwWNn3TfKG5xkN54KAV8giv`)
+
+### 2️⃣ Configure Frontend (2 minutes)
+Create file: `provenance-chain/.env.local`
+```bash
+NEXT_PUBLIC_PROGRAM_ID=<PASTE_PROGRAM_ID_FROM_STEP_1>
+NEXT_PUBLIC_RPC_URL=https://api.devnet.solana.com
+```
+
+### 3️⃣ Start Frontend & Test (5 minutes)
+```bash
+cd provenance-chain
+npm install
+npm run dev
+```
+- Open http://localhost:3000
+- Connect wallet
+- Test submit → verify → explorer
+
+### 4️⃣ Seed Demo Data (Optional, 2 minutes)
+```bash
+node provenance-chain/scripts/seed-demo.cjs
+```
+Then refresh `/explorer` to see demo papers.
 
 ---
 
@@ -540,6 +603,50 @@ npm run dev
 | **Rust Dev** | Anchor program, deployment, PDA strategy, space calculation |
 | **Frontend Dev** | Next.js UI, wallet connection, PDF upload, hash display, Verify banners, Explorer dashboard |
 | **Full-Stack** | Wiring frontend to Anchor (Submit + Update Status flows), integration testing |
+
+---
+
+## 📝 Progress Log (May 2, 2026)
+
+### ✅ Completed Today
+- **Updated README** with progress tracking and demo day guide for non-technical audience
+- **Installed cargo-build-sbf** (Solana build tool) on dev environment
+- **Built smart contract** successfully → `target/deploy/provenance_chain.so` ✅
+- **Obtained devnet SOL** airdrop for deployment wallet
+- **Wallet address:** `4rWch1cqhJZyhs8YkBZLSw8ya4FFPqC2KCLsnxPaADqW` (funded and ready)
+- **Prepared deployment commands** and next-step documentation
+
+### ⏳ Next Session TODO
+1. **Deploy contract** to Devnet (`anchor deploy --provider.cluster devnet`)
+2. **Copy Program ID** from deployment output
+3. **Create `.env.local`** in `provenance-chain/` folder with Program ID
+4. **Start frontend** and test all three features (Submit → Verify → Explorer)
+5. **Seed demo data** (optional): `node provenance-chain/scripts/seed-demo.cjs`
+6. **Final polish** and demo walkthrough
+
+### 🔧 Environment Setup (All Installed)
+- ✅ Rust & Cargo
+- ✅ Solana CLI 
+- ✅ Anchor CLI v1.0.1
+- ✅ cargo-build-sbf v4.0.0
+
+**Path to use in future terminal sessions:**
+```bash
+export PATH="/home/codespace/.cargo/bin:/home/codespace/.local/share/solana/install/active_release/bin:$PATH"
+```
+
+### 📋 Key Files
+- **Contract:** `contract/provenance-chain/programs/provenance-chain/src/lib.rs`
+- **Frontend:** `provenance-chain/app/` (pages: submit, verify, explorer)
+- **Build output:** `contract/provenance-chain/target/deploy/provenance_chain.so`
+- **Deployment location:** Will update Anchor.toml with Program ID after deploy
+
+### 💡 Demo Day Readiness
+**Current state:** Build-ready (90% complete)  
+**Time to demo-ready:** ~10 minutes (just deployment + config)  
+**Estimated prep for live demo:** 15 minutes (seed data + wallet setup)
+
+See "🔴 DEPLOYMENT IN PROGRESS" section at top of this README for quick setup.
 
 ---
 

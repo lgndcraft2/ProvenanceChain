@@ -1,0 +1,6 @@
+Warning: 'anchor deploy' is deprecated. Use 'anchor program deploy' instead.
+Deploying cluster: https://api.devnet.solana.com
+Upgrade authority: /home/codespace/.config/solana/id.json
+Deploying program "provenance_chain"...
+Program path: /workspaces/ProvenanceChain/contract/provenance-chain/target/deploy/provenance_chain.so...
+Error: Account allocation failed: RPC response error -32002: Transaction simulation failed: Attempt to debit an account but found no record of a prior credit.; 
