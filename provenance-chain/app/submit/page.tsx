@@ -65,10 +65,10 @@ export default function SubmitPage() {
       const program = getProgram(provider);
 
       const [paperPDA] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
-      const tx = await program.methods
-        .submitPaper(hash, title.trim(), authorList)
-        .accounts({ paper: paperPDA, owner: publicKey, systemProgram: SystemProgram.programId })
-        .rpc();
+      const tx = await (program.methods as any)
+  .submitPaper(hash, title.trim(), authorList)
+  .accounts({ paper: paperPDA, owner: publicKey, systemProgram: SystemProgram.programId })
+  .rpc();
 
       setTxSig(tx);
       setStep('done');
