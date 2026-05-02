@@ -1,3 +1,4 @@
+// lib/program.ts
 import { AnchorProvider, Idl, Program } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
 
@@ -60,5 +61,6 @@ export const IDL: Idl = {
   ]
 };
 
-export const getProgram = (provider: AnchorProvider) =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getProgram = (provider: AnchorProvider): Program<any> =>
   new Program(IDL, PROGRAM_ID, provider);
