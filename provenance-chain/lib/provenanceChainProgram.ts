@@ -9,11 +9,16 @@ export const PROGRAM_ID = new PublicKey(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const IDL: any = {
   address: process.env.NEXT_PUBLIC_PROGRAM_ID || 'BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm',
-  version: '0.1.0',
-  name: 'provenance_chain',
+  metadata: {
+    name: 'provenance_chain',
+    version: '0.1.0',
+    spec: '0.1.0',
+    description: 'Created with Anchor'
+  },
   instructions: [
     {
       name: 'submitPaper',
+      discriminator: [50, 4, 72, 165, 234, 253, 22, 113],
       accounts: [
         { name: 'paper', writable: true, signer: false },
         { name: 'owner', writable: true, signer: true },
@@ -27,6 +32,7 @@ export const IDL: any = {
     },
     {
       name: 'updateStatus',
+      discriminator: [147, 215, 74, 174, 55, 191, 42, 0],
       accounts: [
         { name: 'paper', writable: true, signer: false },
         { name: 'owner', writable: false, signer: true }
@@ -38,7 +44,13 @@ export const IDL: any = {
   ],
   accounts: [
     {
-      name: 'paperAccount',
+      name: 'PaperAccount',
+      discriminator: [40, 136, 1, 210, 201, 113, 90, 15]
+    }
+  ],
+  types: [
+    {
+      name: 'PaperAccount',
       type: {
         kind: 'struct',
         fields: [
@@ -50,9 +62,7 @@ export const IDL: any = {
           { name: 'owner', type: 'pubkey' }
         ]
       }
-    }
-  ],
-  types: [
+    },
     {
       name: 'PaperStatus',
       type: {
