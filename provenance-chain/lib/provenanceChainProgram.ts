@@ -8,6 +8,7 @@ export const PROGRAM_ID = new PublicKey(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const IDL: any = {
+  address: process.env.NEXT_PUBLIC_PROGRAM_ID || 'BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm',
   version: '0.1.0',
   name: 'provenance_chain',
   instructions: [
@@ -64,4 +65,4 @@ export const IDL: any = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getProgram = (provider: AnchorProvider): Program<any> =>
-  new Program(IDL, PROGRAM_ID, provider);
+  new Program(IDL, provider);
