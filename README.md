@@ -8,24 +8,113 @@ ProvenanceChain is a hackathon MVP that uses Solana to create an immutable, veri
 
 ---
 
-## ✅ Current Status
+## 📊 Project Status
 
-### Done (code complete, awaiting deploy)
-- Anchor program implemented in [contract/provenance-chain/programs/provenance-chain/src/lib.rs](contract/provenance-chain/programs/provenance-chain/src/lib.rs)
-- Submit flow wired to Anchor program in [provenance-chain/app/submit/page.tsx](provenance-chain/app/submit/page.tsx)
-- Verify flow wired to Anchor program in [provenance-chain/app/verify/page.tsx](provenance-chain/app/verify/page.tsx)
-- Explorer load + update-status wired to Anchor program in [provenance-chain/app/explorer/page.tsx](provenance-chain/app/explorer/page.tsx)
-- Demo seeding script added in [provenance-chain/scripts/seed-demo.cjs](provenance-chain/scripts/seed-demo.cjs)
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Smart Contract (Anchor) | ✅ Complete | Ready to deploy to Devnet |
+| Submit Feature | ✅ Complete | Upload PDF → Record on blockchain |
+| Verify Feature | ✅ Complete | Check if document is tampered |
+| Explorer Dashboard | ✅ Complete | View all records + update status |
+| Demo Script | ✅ Complete | Seed test data |
+| Devnet Deploy | ⏳ Ready | Next step: `anchor deploy` |
+| Demo Setup | ⏳ Ready | Will load after deploy |
+| Testing + Polish | 🔄 In Progress | Final refinements |
 
-### Remaining
-- Deploy Anchor program to Devnet and capture program ID
-- Seed demo papers on-chain (Task 7 in plan below)
-- Create a tampered PDF for Verify demo (Task 8)
-- End-to-end polish + testing (Task 9)
+**Overall Progress: ~85% — Core features done, awaiting deployment & testing**
 
 ---
 
-## 🧪 How To Test (Local UI + Devnet)
+## 🎯 What Is ProvenanceChain? (In Plain English)
+
+**The Problem:** Imagine you're a researcher who submits a paper to a conference. Later, someone claims they wrote it first, or someone creates a fake version saying you changed your results. How do you prove when your document was actually created and that it hasn't been altered?
+
+**The Solution:** ProvenanceChain lets you upload any document (PDF, paper, thesis, etc.) and instantly gets a permanent, unchangeable record on the blockchain. Think of it like a notary public, but completely decentralized and instant.
+
+**What You Can Do:**
+- **Record**: Upload a PDF → Get a blockchain timestamp (proof you owned it at this moment)
+- **Verify**: Upload any PDF → Check if it's the exact same file or if it's been tampered with
+- **Track**: View all your recorded documents in one dashboard
+
+The document stays on your computer. Only a tiny unique fingerprint (like a document's DNA) goes on the blockchain, so it's fast and cheap.
+
+---
+
+## 🚀 Demo Day Guide (No Technical Background Needed)
+
+### Before Your Demo
+You'll need:
+1. **A Solana wallet** — Free, takes 2 minutes. Get one at [phantom.app](https://phantom.app)
+2. **Some test SOL** — Free test coins (devnet). You'll get these automatically
+3. **Our app running** — Instructions below
+
+### The Demo Flow (What Your Audience Will See)
+
+#### Part 1: Record a Paper (3 minutes)
+1. Open the **Record** tab
+2. Upload any PDF (use `provenance-chain/scripts/sample-paper.pdf` or any research paper)
+3. Fill in: Title, Authors, Description
+4. Click "Submit"
+5. **Magic happens**: Your wallet pops up, you sign (no money involved), and **BOOM** — it's recorded on the blockchain forever
+
+**What to say to the audience:**  
+*"This paper is now timestamped on an immutable blockchain. We have permanent proof this exact version existed right now, created by these authors."*
+
+---
+
+#### Part 2: Verify a Document (2 minutes)
+1. Open the **Verify** tab
+2. Download the same PDF you just recorded (should be in your Downloads)
+3. Upload it again
+4. **Result**: "✅ VERIFIED — This document matches the original"
+5. Now, if you try to verify a **different PDF** (or one with even 1 pixel changed), it will say "❌ DOCUMENT MISMATCH"
+
+**What to say to the audience:**  
+*"Anyone on the planet can verify this document is authentic — no middleman, no fee. If someone tries to claim a different version is the original, the blockchain proves they're lying."*
+
+---
+
+#### Part 3: Track & Update Status (2 minutes)
+1. Open the **Explorer** (your dashboard)
+2. See all your recorded papers
+3. Click on one and change its status: `DRAFT` → `SUBMITTED` → `PUBLISHED` → `CITED`
+4. Each update creates a new blockchain transaction (all historical states are permanently preserved)
+
+**What to say to the audience:**  
+*"The entire history is on the blockchain. You can track when a paper moved from draft to publication. This is perfect for proving priority in research disputes."*
+
+---
+
+### Quick Setup (5 minutes)
+
+#### Step 1: Get the app running locally
+```bash
+cd provenance-chain
+npm install
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000)
+
+#### Step 2: Connect your wallet
+- Click "Connect Wallet" (top right)
+- Select Phantom (or your wallet)
+- **Important**: Make sure your wallet is set to **Devnet** (test network, not mainnet)
+
+#### Step 3: You're ready!
+The app works with test coins automatically. Just click "Submit" on any page.
+
+---
+
+### 💡 Demo Tips
+- **Use the seeded demo data** to show the app already populated: Run this first (instructions in technical section below)
+- **Prepare 2-3 PDFs** in advance so you don't waste time downloading
+- **Practice once offline** so you know where buttons are
+- **If wallet pops up slowly**, that's normal—blockchain signing takes a moment
+- **Have a backup story ready**: If something glitches, explain the feature and show the code—the logic is sound
+
+---
+
+## 🧪 How To Test (Technical Setup)
 
 ### 1) Deploy the program (Devnet)
 ```bash
@@ -63,7 +152,7 @@ Open `/explorer`.
 
 ---
 
-## 🚀 Demo Data (Seed Papers)
+## 🚀 Seed Demo Data (Optional)
 After deploy + env setup, run:
 ```bash
 node provenance-chain/scripts/seed-demo.cjs

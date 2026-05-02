@@ -4,14 +4,11 @@
 resolution = true
 skip-lint = false
 
+[programs.devnet]
+provenance_chain = "BvkDzStztdtVZZXL5R364xwWNn3TfKG5xkN54KAV8giv"
+
 [programs.localnet]
 provenance_chain = "BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm"
-
-[programs.devnet]
-provenance_chain = "BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm"
-
-[registry]
-url = "https://api.apr.dev"
 
 [provider]
 cluster = "devnet"
@@ -19,3 +16,5 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run mocha -t 1000000 tests/"
+
+[hooks]
