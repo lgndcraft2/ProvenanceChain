@@ -3,12 +3,12 @@ import { AnchorProvider, Program } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
 
 export const PROGRAM_ID = new PublicKey(
-  process.env.NEXT_PUBLIC_PROGRAM_ID || 'BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm'
+  process.env.NEXT_PUBLIC_PROGRAM_ID || 'Bnay8BtGMQXqeZEtUxZD8kXq56yQY4gcSeDb71UCGzgQ'
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const IDL: any = {
-  address: process.env.NEXT_PUBLIC_PROGRAM_ID || 'BchWFiSaRvWfyh5fYopg2XXVxaRtwBuUwyq65Mbu3svm',
+  address: process.env.NEXT_PUBLIC_PROGRAM_ID || 'Bnay8BtGMQXqeZEtUxZD8kXq56yQY4gcSeDb71UCGzgQ',
   metadata: {
     name: 'provenance_chain',
     version: '0.1.0',
