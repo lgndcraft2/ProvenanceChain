@@ -65,6 +65,13 @@ export default function SubmitPage() {
       const program = getProgram(provider);
 
       const [paperPDA] = PublicKey.findProgramAddressSync([Buffer.from(hash.substring(0, 32))], PROGRAM_ID);
+      
+      // Pre-check if the document already exists to avoid ugly RPC errors
+      const accountInfo = await connection.getAccountInfo(paperPDA);
+      if (accountInfo) {
+        throw new Error('This exact document has already been recorded on the blockchain!');
+      }
+
       const tx = await (program.methods as any)
   .submitPaper(hash, title.trim(), authorList)
   .accounts({ paper: paperPDA, owner: publicKey, systemProgram: SystemProgram.programId })
