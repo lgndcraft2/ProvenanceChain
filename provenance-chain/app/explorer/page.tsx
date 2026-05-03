@@ -63,7 +63,8 @@ export default function ExplorerPage() {
           txSig: '',
         }));
         if (mounted) setPapers(loaded.sort((a, b) => b.timestamp - a.timestamp));
-      } catch {
+      } catch (e) {
+        console.error("Failed to load papers:", e);
         if (mounted) setPapers([]);
       } finally {
         if (mounted) setLoading(false);
@@ -75,7 +76,8 @@ export default function ExplorerPage() {
 
   const filtered = papers.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase())
-      || p.authors.some(a => a.toLowerCase().includes(search.toLowerCase()));
+      || p.authors.some(a => a.toLowerCase().includes(search.toLowerCase()))
+      || p.hash.toLowerCase().includes(search.toLowerCase());
     const matchFilter = filter === 'All' || p.status === filter;
     return matchSearch && matchFilter;
   });

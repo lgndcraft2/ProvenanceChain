@@ -66,7 +66,7 @@ export default function VerifyPage() {
       const provider = new AnchorProvider(connection, readOnlyWallet as never, { commitment: 'confirmed' });
       const program = getProgram(provider);
 
-      const [pda] = PublicKey.findProgramAddressSync([Buffer.from(hash)], PROGRAM_ID);
+      const [pda] = PublicKey.findProgramAddressSync([Buffer.from(hash.substring(0, 32))], PROGRAM_ID);
       const account = await (program.account as any).paperAccount.fetch(pda);
 
       const rawStatus = (account.status || {}) as Record<string, unknown>;
