@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("BvkDzStztdtVZZXL5R364xwWNn3TfKG5xkN54KAV8giv");
+declare_id!("Bnay8BtGMQXqeZEtUxZD8kXq56yQY4gcSeDb71UCGzgQ");
 
 const HASH_LEN: usize = 64;
 const TITLE_MAX_LEN: usize = 200;
